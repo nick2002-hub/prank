@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prank Page</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    font-family: system-ui, sans-serif; background: #0f172a; color: #fff; text-align: center; padding: 20px;
+  }
+  .card { max-width: 460px; width: 100%; }
+  h1 { font-size: 2rem; margin: 0 0 12px; }
+  p { color: #cbd5e1; margin: 0 0 24px; }
+  button {
+    background: #facc15; color: #111; border: 0; padding: 16px 32px; font-size: 1.1rem;
+    font-weight: 700; border-radius: 12px; cursor: pointer;
+  }
+  button:active { transform: scale(.97); }
+  #terminal {
+    display: none; text-align: left; background: #000; color: #22c55e; font-family: monospace;
+    padding: 20px; border-radius: 10px; min-height: 220px; white-space: pre-wrap; font-size: .9rem;
+  }
+  .bar { height: 10px; background: #1e293b; border-radius: 99px; margin-top: 14px; overflow: hidden; display: none; }
+  .bar div { height: 100%; width: 0; background: #22c55e; transition: width .3s; }
+  #reveal { display: none; }
+  #reveal h1 { font-size: 3rem; }
+  .big { font-size: 5rem; }
+</style>
+</head>
+<body>
+
+<!-- STEP 1: the bait -->
+<div class="card" id="bait">
+  <h1 id="baitTitle"></h1>
+  <p id="baitText"></p>
+  <button id="baitBtn"></button>
+</div>
+
+<!-- STEP 2: fake "hacking" screen -->
+<div class="card" id="fake" style="display:none">
+  <div id="terminal"></div>
+  <div class="bar" id="bar"><div id="fill"></div></div>
+</div>
+
+<!-- STEP 3: the reveal -->
+<div class="card" id="reveal">
+  <div class="big" id="revealEmoji"></div>
+  <h1 id="revealTitle"></h1>
+  <p id="revealText"></p>
+</div>
+
+<script>
+// ============ EDIT THIS PART ============
+const CONFIG = {
+  tabTitle:    "Congratulations!",
+
+  // Step 1 (what your friend sees first)
+  baitTitle:   "🎁 You won a FREE iPhone!",
+  baitText:    "You are today's lucky visitor. Tap below to claim your prize.",
+  baitButton:  "CLAIM NOW",
+
+  // Step 2 (fake hacking lines, shown one by one)
+  fakeLines: [
+    "Connecting to server...",
+    "Accessing phone gallery...",
+    "Reading messages...",
+    "Uploading 1,284 photos...",
+    "Sending to everyone in contacts...",
+    "Almost done..."
+  ],
+  lineDelayMs: 900,
+
+  // Step 3 (the reveal)
+  revealEmoji: "😂",
+  revealTitle: "PRANKED!",
+  revealText:  "Relax, nothing happened. This is just a fake page. 😎 – from Jermaine",
+
+  // Optional: play a funny beep at the reveal (true / false)
+  beep: true
+};
+// ========================================
+
+document.title = CONFIG.tabTitle;
+baitTitle.textContent = CONFIG.baitTitle;
+baitText.textContent  = CONFIG.baitText;
+baitBtn.textContent   = CONFIG.baitButton;
+revealEmoji.textContent = CONFIG.revealEmoji;
+revealTitle.textContent = CONFIG.revealTitle;
+revealText.textContent  = CONFIG.revealText;
+
+function playBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [880, 660, 880].forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.frequency.value = f; o.connect(g); g.connect(ctx.destination);
+      g.gain.value = 0.2;
+      o.start(ctx.currentTime + i * 0.2); o.stop(ctx.currentTime + i * 0.2 + 0.15);
+    });
+  } catch (e) {}
+}
+
+baitBtn.addEventListener("click", () => {
+  bait.style.display = "none";
+  fake.style.display = "block";
+  terminal.style.display = "block";
+  bar.style.display = "block";
+
+  let i = 0;
+  const total = CONFIG.fakeLines.length;
+  const timer = setInterval(() => {
+    terminal.textContent += "> " + CONFIG.fakeLines[i] + "\n";
+    i++;
+    fill.style.width = Math.round((i / total) * 100) + "%";
+    if (i >= total) {
+      clearInterval(timer);
+      setTimeout(() => {
+        fake.style.display = "none";
+        reveal.style.display = "block";
+        document.body.style.background = "#7c3aed";
+        if (CONFIG.beep) playBeep();
+      }, 800);
+    }
+  }, CONFIG.lineDelayMs);
+});
+</script>
+</body>
+</html>
